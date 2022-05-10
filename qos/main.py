@@ -5,7 +5,7 @@ from tkinter import CENTER
 import speedtest
 import speedtest1 as sp
 import os
-
+import matplotlib.pyplot as plt
 def speedTest(flag):
     servers=[]
     i=0
@@ -45,7 +45,24 @@ def ftpTestloop():
     pass
 
 def showstats1():
-    pass
+    f = open("file.csv", newline='')
+    csv_reader = csv.reader(f)
+   #download,upload,ping,time
+    x=[]
+    y=[]
+    i=0
+    for row in csv_reader:
+        if(i==0):
+            i=i+1
+        else:
+            y.append(row[2])
+            x.append(row[3])
+    # plot
+    plt.plot(x,y)
+    # beautify the x-labels
+    plt.gcf().autofmt_xdate()
+    plt.show()
+        
 
 def showstats2():
     pass
@@ -63,6 +80,7 @@ if __name__ == "__main__":
         print("2  DnsTest")
         print("3  FtpTeste")
         print("4  SpeedTest para CSV")
+        print("5  Abrir grafico Latencia por hora do dia")
         print("0 para sair") 
         x=input()
         if(x=="1"):
@@ -97,7 +115,9 @@ if __name__ == "__main__":
                 else: 
                     print("opcao nao reconhecida")
                           
-                    
+        elif(x=="5"):
+             os.system('cls||clear')
+             showstats1()          
                     
         elif(x=="0"):
             os.system('cls||clear')
