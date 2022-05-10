@@ -1,0 +1,36 @@
+; <<>> DiG 9.18.0 <<>> google.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 7614
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 4, ADDITIONAL: 9
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 2e9e1a5870b5c70f729e4d0862739bceee408249f2c92308 (good)
+;; QUESTION SECTION:
+;google.com.			IN	A
+
+;; ANSWER SECTION:
+google.com.		194	IN	A	142.250.184.14
+
+;; AUTHORITY SECTION:
+google.com.		2006	IN	NS	ns4.google.com.
+google.com.		2006	IN	NS	ns2.google.com.
+google.com.		2006	IN	NS	ns3.google.com.
+google.com.		2006	IN	NS	ns1.google.com.
+
+;; ADDITIONAL SECTION:
+ns2.google.com.		3532	IN	A	216.239.34.10
+ns3.google.com.		2178	IN	A	216.239.36.10
+ns4.google.com.		2178	IN	A	216.239.38.10
+ns1.google.com.		2178	IN	A	216.239.32.10
+ns2.google.com.		2999	IN	AAAA	2001:4860:4802:34::a
+ns3.google.com.		2999	IN	AAAA	2001:4860:4802:36::a
+ns4.google.com.		2999	IN	AAAA	2001:4860:4802:38::a
+ns1.google.com.		2999	IN	AAAA	2001:4860:4802:32::a
+
+;; Query time: 9 msec
+;; SERVER: 193.137.16.65#53(193.137.16.65) (UDP)
+;; WHEN: Thu May 05 10:41:32 WEST 2022
+;; MSG SIZE  rcvd: 331
+

@@ -1,0 +1,20 @@
+PING 142.250.184.14 (142.250.184.14): 56 data bytes
+64 bytes from 142.250.184.14: icmp_seq=0 ttl=114 time=19.837 ms
+64 bytes from 142.250.184.14: icmp_seq=1 ttl=114 time=16.638 ms
+64 bytes from 142.250.184.14: icmp_seq=2 ttl=114 time=18.165 ms
+64 bytes from 142.250.184.14: icmp_seq=3 ttl=114 time=18.519 ms
+64 bytes from 142.250.184.14: icmp_seq=4 ttl=114 time=17.059 ms
+Request timeout for icmp_seq 5
+64 bytes from 142.250.184.14: icmp_seq=6 ttl=114 time=16.616 ms
+64 bytes from 142.250.184.14: icmp_seq=7 ttl=114 time=18.625 ms
+64 bytes from 142.250.184.14: icmp_seq=8 ttl=114 time=18.141 ms
+64 bytes from 142.250.184.14: icmp_seq=9 ttl=114 time=18.774 ms
+64 bytes from 142.250.184.14: icmp_seq=10 ttl=114 time=20.449 ms
+64 bytes from 142.250.184.14: icmp_seq=11 ttl=114 time=18.291 ms
+64 bytes from 142.250.184.14: icmp_seq=12 ttl=114 time=19.914 ms
+64 bytes from 142.250.184.14: icmp_seq=13 ttl=114 time=17.998 ms
+64 bytes from 142.250.184.14: icmp_seq=14 ttl=114 time=18.311 ms
+
+--- 142.250.184.14 ping statistics ---
+15 packets transmitted, 14 packets received, 6.7% packet loss
+round-trip min/avg/max/stddev = 16.616/18.381/20.449/1.107 ms
