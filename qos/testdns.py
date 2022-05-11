@@ -42,7 +42,7 @@ path = "stat_files"
 
 mainMenu_options = {
     1: 'Choose HostName to test',
-    2: 'Exit App'
+    2: 'Exit DnsTest'
 }
 
 query_options = {
@@ -208,7 +208,7 @@ def option_hostname(hostname):
 
 
 def print_mainMenu():
-    print("---------------<MAIN MENU APP>-----------------")
+    print("---------------<MAIN MENU DnsTest>-----------------")
     for key in mainMenu_options.keys():
         print(key, '--', mainMenu_options[key] )
 

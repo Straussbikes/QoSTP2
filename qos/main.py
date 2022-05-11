@@ -1,11 +1,11 @@
 import csv
-#import matplotlib
 import subprocess
 from tkinter import CENTER
 import speedtest
 import speedtest1 as sp
 import os
 import matplotlib.pyplot as plt
+from datetime import datetime
 def speedTest(flag):
     servers=[]
     i=0
@@ -45,19 +45,24 @@ def ftpTestloop():
     pass
 
 def showstats1():
+    dic={}
     f = open("file.csv", newline='')
     csv_reader = csv.reader(f)
    #download,upload,ping,time
     x=[]
     y=[]
-    i=0
+    bruh={}
     for row in csv_reader:
-        if(i==0):
-            i=i+1
-        else:
-            y.append(row[2])
-            x.append(row[3])
+        if(row[0]=="download"):
+            pass
+        else: 
+            #time_object = datetime.strptime(row[3], '%H:%M:%S').time()
+            bruh[row[3]]=float(row[2])
     # plot
+    aux=sorted(bruh.items())
+    for (a,b) in aux:
+        x.append(a)
+        y.append(b)
     plt.plot(x,y)
     # beautify the x-labels
     plt.gcf().autofmt_xdate()
