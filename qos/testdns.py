@@ -1,61 +1,31 @@
 import dns.resolver
 import socket
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import csv
-from tempfile import NamedTemporaryFile
+import glob
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # Guardar histórico de pesquisas para depois aproveitarmos estatísticas
 nameservers_history = {}
-nameservers_query = {}
-
-
-#hostname= input("Nome de Dominío a testar: ")
-def queryTimeDNS(hostn,queryType,queryName):
-    # Set the DNS Server
-    resolver = dns.resolver.Resolver()
-    resolver.nameservers = [socket.gethostbyname(hostn)]
-
-    queryStartTime = datetime.now()
-    try:
-        if queryType == "ptr":
-            answer = resolver.resolve(queryName)
-        else:
-            answer = resolver.resolve(queryName, queryType)
-
-            # End query time.
-    except:
-        pass
-
-    queryEndTime = datetime.now()
-
-    # Calculate the difference between End Query Time and Start Query Time
-    # Multiply the result by a 1000 to get millisecond response.
-    queryTime = (queryEndTime - queryStartTime).total_seconds() * 1000
-
-    # Format the queryTime response.
-    s_queryTime = str("{:.1f}".format(queryTime))
-
-###################################################################3
 
 path = "stat_files"
 
 mainMenu_options = {
     1: 'Choose HostName to test',
-    2: 'Exit DnsTest'
+    2: 'Get Statistical Data from known Hostname',
+    3: 'Exit App'
 }
 
 query_options = {
     1: 'Type A (IPv4)',
     2: 'Type AAAA (IPv6)',
-    3: 'Type PTR (Domain Name pointer)',
-    4: 'Type NS (An authoritative name server)',
-    5: 'Type MX (A mail exchange)',
-    6: 'Type TXT (text strings)',
-    7: 'Type SRV (Service Record)',
-    8: 'Type NAPTR (Naming authority pointer)',
-    9: 'Type CNAME (Domain Name Alias)',
-    10: 'Exit to Main Menu'
+    3: 'Type NS (An authoritative name server)',
+    4: 'Type MX (A mail exchange)',
+    5: 'Type TXT (text strings)',
+    6: 'Type CNAME (Domain Name Alias)',
+    7: 'Exit to Main Menu'
 }
 
 # -------------------- File treatment -----------------------
@@ -66,14 +36,13 @@ def createFile(hostname):
 
     file = os.path.join(path, hostname)
     filename = file.rstrip() + '.csv'
-    header = ('Query','Start_time','Task_time')
+    header = ('Query','Start_time','Task_time (ms)')
     writerFile(header,[],filename,"create")
     return filename
 
 
 # option de criar ou então dar update com nova row
 def writerFile(header,data, filename_path,option):
-    print("FILENAME_PATH",filename_path)
     if option == 'create':
         with open(filename_path,'w') as csvfile:
             cenas = csv.writer(csvfile)
@@ -89,14 +58,19 @@ def writerFile(header,data, filename_path,option):
 def option_query(queryType,hostname):
     print('---------------------------------------------^')
     print('HOSTNAME ' + hostname + ' :')
-    queryStartTime = datetime.now()
+
     resolver = dns.resolver.Resolver()
 
+    # clear cache para real pesquisa dns
+    print('--------------Flushing Cache-----------------^')
+    os.system('ipconfig/flushdns')
+
+
+    # start time
+    queryStartTime = datetime.now()
+
     try:
-        if queryType == "ptr":
-            answer = resolver.resolve(queryType)
-        else:
-            answer = resolver.resolve(hostname, queryType)
+        answer = resolver.resolve(hostname, queryType)
 
     except dns.rdatatype.UnknownRdatatype:
         print('Unkown DNS response - ' + queryType + ' @' + hostname)
@@ -133,7 +107,6 @@ def option_query(queryType,hostname):
 
     nameservers_history[hostname].append([queryType, queryStartTime, s_queryTime])
 
-    #print('ANSWER: ' + answer + '\nTime taken: ' + s_queryTime)
     print('---------------------------------------------^')
     for response in answer:
         if queryType == 'CNAME':
@@ -147,16 +120,24 @@ def option_query(queryType,hostname):
             print('RESULT IPv4 address: ' + queryResponse)
         elif queryType == 'MX':
             print('RESULT Host ',response.exchange,'has preference ',response.preference)
+        elif queryType == 'NS':
+            for ans in answer.response.answer:
+                for item in ans.items:
+                   print( 'RESULT NS query: '+ item.to_text())
         elif queryType == 'TXT':
             queryResponse = response.to_text()
             print('RESULT TXT query: ' + queryResponse)
+
     print('---------------------------------------------^')
     print('Time taken: ' + s_queryTime + ' ms')
-    print('---------------------------------------------^')
+    print('---------------------------------------------^\n')
 
     data = [(queryType,str(queryStartTime),str(s_queryTime))]
     file = os.path.join(path, hostname + '.csv' )
     writerFile([],data,file,"update")
+
+
+# -------------------- MainMenu and SubMenus --------------------------
 
 def option_hostname(hostname):
     h = hostname.rstrip()
@@ -166,7 +147,7 @@ def option_hostname(hostname):
             print(key, '--', query_options[key])
         option = ''
         try:
-            option = int(input('Enter your choice for Query Type: '))
+            option = int(input('\nEnter your choice for Query Type or Exit: '))
         except:
             print('Wrong input. Please enter a number ...')
         # Check what choice was entered and act accordingly
@@ -176,41 +157,189 @@ def option_hostname(hostname):
         elif option == 2: # AAAA
             os.system('cls||clear')
             option_query('AAAA',h)
-        elif option == 3: # PTR
-            os.system('cls||clear')
-            option_query('PTR',h)
-        elif option == 4: # NS
+        elif option == 3: # NS
             os.system('cls||clear')
             option_query('NS',h)
-        elif option == 5: # MX
+        elif option == 4: # MX
             os.system('cls||clear')
             option_query('MX',h)
-        elif option == 6: # TXT
+        elif option == 5: # TXT
             os.system('cls||clear')
             option_query('TXT',h)
-        elif option == 7: # SRV
-            os.system('cls||clear')
-            option_query('SRV',h)
-        elif option == 8: # NAPTR
-            os.system('cls||clear')
-            option_query('naptr',h)
-        elif option == 9: # CNAME
+        elif option == 6: # CNAME
             os.system('cls||clear')
             option_query('CNAME',h)
-        elif option == 10:
+        elif option == 7:
             os.system('cls||clear')
-            print('Thanks message before exiting')
+            print('Going to Main Menu')
             break
         else:
             os.system('cls||clear')
-            print('INVALID OPTION. Please enter a number between 1 and 10...')
+            print('INVALID OPTION. Please enter a number between 1 and 9...')
 
 
-
+# MainMenu
 def print_mainMenu():
-    print("---------------<MAIN MENU DnsTest>-----------------")
+    os.system('cls||clear')
+    print("---------------<MAIN MENU APP>-----------------")
     for key in mainMenu_options.keys():
         print(key, '--', mainMenu_options[key] )
+
+
+# Files Available Menu
+def print_FileStatMenu():
+    os.chdir("stat_files/")
+    index = 1
+    files = {}
+    for file in glob.glob("*.csv"):
+        files[index] = file
+        index += 1
+    while (True):
+        for key in files.keys():
+            print(key, '--', files[key])
+        print(index, '-- Average A query for all files')
+        print(index+1, '-- Exit')
+        option = ''
+        try:
+            option = int(input('\nEnter your choice for File or Exit: '))
+        except:
+            print('Wrong input. Please enter a number ...')
+
+        if option == index+1:
+            os.system('cls||clear')
+            # TENHO DE ALTERAR ISTO PARA VIR
+            os.chdir("C:\\Users\\USER\\Desktop\\Mestrado\\2SEM\PERFIL_EI\\QoSI\\TP2")
+            print('Going to Main Menu')
+            break
+
+        elif option == index:
+            os.system('cls||clear')
+            getAqueryStatsAll(files.values())
+
+        else:
+            os.system('cls||clear')
+            fd = pd.read_csv(files[option])
+            types_q = queriesPerFile(fd)
+            try:
+                print_querieByFile(files[option],fd,types_q)
+            except:
+                break
+
+
+# Queries By File Available Menu
+def getAqueryStatsAll(files):
+    queriebyfile = {}
+    for fi in files:
+        df = pd.read_csv(fi)
+        query_a = df.loc[df['Query'] == 'A']
+        queriebyfile[fi] = query_a
+
+    # fazer média de cada ficheiro
+
+    medias = {}
+    for ft in queriebyfile:
+        sum = 0
+        results = queriebyfile[ft]
+        for t in results['Task_time(ms)']:
+            sum += t
+        medias[ft] = sum/len(results['Task_time(ms)'])
+
+    #desenhar gráfico de media de cada ficheiro
+    # creating the dataset
+    type_q = list(medias.keys())
+    values = list(medias.values())
+
+    fig = plt.figure(figsize=(10, 5))
+
+    # creating the bar plot
+    plt.bar(type_q, values, color='maroon',
+            width=0.4)
+
+    plt.xlabel("Name Domains")
+    plt.ylabel("Time(ms)")
+    plt.title("Tempo de resposta média a para cada domínio requisitado")
+    plt.show()
+
+
+def print_querieByFile(filename,fileDataframe, queries):
+    dq = {}
+    while (True):
+        index = 1
+        for q in queries:
+            print(index, '--', q)
+            dq[index] = q
+            index+=1
+        print(index, '-- Exit')
+        option = ''
+        try:
+            option = int(input('\nEnter your choice for Query Statistic or Exit: '))
+        except:
+            print('Wrong input. Please enter a number ...')
+
+        if option == index:
+            os.system('cls||clear')
+            print('Going to File Menu')
+            break
+        else:
+
+            try:
+                showQueryBarPlot(filename,fileDataframe, dq[option])
+                os.system('cls||clear')
+
+            except:
+                os.system('cls||clear')
+                break
+
+
+# ----------------------- Métodos de estatísticas por query -----------------------
+
+# Dá-me uma lista de queries feitas num nome de dominio
+def queriesPerFile(file):
+    queries = file['Query'].unique().tolist()
+    return queries
+
+
+# Apresenta um bar plot do ficheiro e da query requerida
+def showQueryBarPlot(filename,fileDF,query):
+    query_a = fileDF.loc[fileDF['Query'] == query]
+    start_t = query_a['Start_time'].tolist()
+    task_t = query_a['Task_time(ms)'].tolist()
+
+    different_dates = {}
+    for i, s in enumerate(start_t):
+        # print(i, s)
+        date_time_obj = datetime.strptime(s, '%Y-%m-%d %H:%M:%S.%f')
+        # getalldates[date_time_obj] = task_t[i]
+        if str(date_time_obj.date()) not in different_dates:
+            different_dates[str(date_time_obj.date())] = [0, 0]
+
+        different_dates[str(date_time_obj.date())][0] += 1
+        different_dates[str(date_time_obj.date())][1] += task_t[i]
+
+
+
+    median_date = {}
+    for d in different_dates:
+        median_date[d] = different_dates[d][1] / different_dates[d][0]
+
+
+
+    type_q = list(median_date.keys())
+    values = list(median_date.values())
+
+    # Figure Size
+    fig = plt.figure(figsize=(10, 5))
+
+    # creating the bar plot
+    plt.bar(type_q, values, color='blue',
+            width=0.4)
+    plt.title('Valores de tempo medido para ' + filename + ' em query ' + query)
+    plt.ylabel('Data de Medição')
+    plt.xlabel('Tempo medido')
+    plt.show()
+
+
+
 
 
 while True:
@@ -239,8 +368,12 @@ while True:
 
     elif option == 2:
         os.system('cls||clear')
+        print_FileStatMenu()
+
+    elif option == 3:
+        os.system('cls||clear')
         print('Thanks for using APP !!')
-        break
+        exit()
     else:
         os.system('cls||clear')
         print('Invalid option. Please enter a number between 1 and 2...')
