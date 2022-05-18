@@ -28,8 +28,6 @@ query_options = {
     7: 'Exit to Main Menu'
 }
 
-
-
 # -------------------- File treatment -----------------------
 
 def createFile(hostname):
@@ -209,7 +207,6 @@ def print_FileStatMenu():
 
         if option == index+1:
             os.system('cls||clear')
-            # TENHO DE ALTERAR ISTO PARA VIR
             os.chdir(main_directoy)
             print('Going to Main Menu')
             break
@@ -227,43 +224,6 @@ def print_FileStatMenu():
             except:
                 break
 
-
-# Queries By File Available Menu
-def getAqueryStatsAll(files):
-    queriebyfile = {}
-    for fi in files:
-        df = pd.read_csv(fi)
-        query_a = df.loc[df['Query'] == 'A']
-        queriebyfile[fi] = query_a
-
-    # fazer média de cada ficheiro
-
-    medias = {}
-    for ft in queriebyfile:
-        sum = 0
-        results = queriebyfile[ft]
-        for t in results['Task_time(ms)']:
-            sum += t
-        medias[ft] = sum/len(results['Task_time(ms)'])
-
-    #desenhar gráfico de media de cada ficheiro
-    # creating the dataset
-    type_q = list(medias.keys())
-    values = list(medias.values())
-
-    fig = plt.figure(figsize=(10, 5))
-
-    # creating the bar plot
-    bars = plt.bar(type_q, values, color='maroon',
-            width=0.4)
-
-    for bar in bars:
-        yval = bar.get_height()
-        plt.text(bar.get_x(), yval + .05, yval)
-    plt.xlabel("Name Domains")
-    plt.ylabel("Tempo Medido(ms)")
-    plt.title("Tempo de resposta média a para cada domínio requisitado")
-    plt.show()
 
 
 def print_querieByFile(filename,fileDataframe, queries):
@@ -288,7 +248,110 @@ def print_querieByFile(filename,fileDataframe, queries):
         else:
 
             try:
-                showQueryBarPlot(filename,fileDataframe, dq[option])
+                os.system('cls||clear')
+                printOptionsOfQuery(filename,fileDataframe, dq[option])
+
+            except:
+                os.system('cls||clear')
+                break
+
+
+
+optiontoQuery = {
+    1: 'Statistics by the Day',
+    2: 'Statistics of a Day',
+    3: 'Exit App'
+}
+def printOptionsOfQuery(filename,fileDataframe,query):
+    while (True):
+
+        for key in optiontoQuery.keys():
+            print(key, '--', optiontoQuery[key])
+
+        option = ''
+        try:
+            option = int(input('\nEnter your choice for Query Statistic or Exit: '))
+        except:
+            print('Wrong input. Please enter a number ...')
+
+        if option == 3:
+            os.system('cls||clear')
+            print('Going to Query of ', filename,' Menu')
+            break
+
+        elif option == 1:
+            try:
+                showQueryBarPlot(filename,fileDataframe, query)
+                os.system('cls||clear')
+
+            except:
+                os.system('cls||clear')
+                break
+
+        elif option == 2:
+            os.system('cls||clear')
+            printDaysOfQuery(filename,fileDataframe,query)
+
+
+# ----------------------- Métodos de estatísticas por query -----------------------
+
+def printDaysOfQuery(filename,fileDataframe,query):
+    query_a = fileDataframe.loc[fileDataframe['Query'] == query]
+    start_t = query_a['Start_time'].tolist()
+    task_t = query_a['Task_time(ms)'].tolist()
+
+    different_dates = {}
+    for i, s in enumerate(start_t):
+        # print(i, s)
+        date_time_obj = datetime.strptime(s, '%Y-%m-%d %H:%M:%S.%f')
+        # getalldates[date_time_obj] = task_t[i]
+        if str(date_time_obj.date()) not in different_dates:
+            different_dates[str(date_time_obj.date())] = [[], []]
+
+        different_dates[str(date_time_obj.date())][0].append(date_time_obj.time())
+        different_dates[str(date_time_obj.date())][1].append(task_t[i])  # task_t[i]
+
+
+
+    print("DIFFERENT_DATE: ", different_dates.keys())
+    dq={}
+    while (True):
+        index = 1
+        for q in different_dates.keys():
+            print(index, '--', q)
+            dq[index] = q
+            index += 1
+        print(index, '-- Exit')
+        option = ''
+        try:
+            option = int(input('\nEnter your choice type o Statistic: '))
+        except:
+            print('Wrong input. Please enter a number ...')
+
+        if option == index:
+            os.system('cls||clear')
+            print('Going to Stastistics of Query, ',filename,'  Menu')
+            break
+        else:
+
+            try:
+                tempos = []
+                for t1 in different_dates[dq[option]][0]:
+                    mark = str(t1.hour) + ':' + str(t1.minute) + ':' + str(t1.second)
+                    tempos.append(mark)
+                    # print(mark)
+                    # print("Created at %s:%s" % (t1.hour, t1.minute))
+
+
+                plt.title("Valores de tempo medidos para " + filename + " no dia " + dq[option])
+                plt.xlabel('Hora')
+                plt.ylabel('Tempo medido(ms)')
+
+                plt.plot(tempos, different_dates[dq[option]][1])
+
+                # beautify the x-labels
+                plt.gcf().autofmt_xdate()
+                plt.show()
                 os.system('cls||clear')
 
             except:
@@ -296,7 +359,7 @@ def print_querieByFile(filename,fileDataframe, queries):
                 break
 
 
-# ----------------------- Métodos de estatísticas por query -----------------------
+
 
 # Dá-me uma lista de queries feitas num nome de dominio
 def queriesPerFile(file):
@@ -353,43 +416,85 @@ def showQueryBarPlot(filename,fileDF,query):
     plt.show()
 
 
+
+
+# Queries By File Available Menu
+def getAqueryStatsAll(files):
+    queriebyfile = {}
+    for fi in files:
+        df = pd.read_csv(fi)
+        query_a = df.loc[df['Query'] == 'A']
+        queriebyfile[fi] = query_a
+
+    # fazer média de cada ficheiro
+
+    medias = {}
+    for ft in queriebyfile:
+        sum = 0
+        results = queriebyfile[ft]
+        for t in results['Task_time(ms)']:
+            sum += t
+        medias[ft] = sum/len(results['Task_time(ms)'])
+
+    #desenhar gráfico de media de cada ficheiro
+    # creating the dataset
+    type_q = list(medias.keys())
+    values = list(medias.values())
+
+    fig = plt.figure(figsize=(10, 5))
+
+    # creating the bar plot
+    bars = plt.bar(type_q, values, color='maroon',
+            width=0.4)
+
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x(), yval + .05, yval)
+    plt.xlabel("Name Domains")
+    plt.ylabel("Tempo Medido(ms)")
+    plt.title("Tempo de resposta média a para cada domínio requisitado")
+    plt.show()
+
 # ----------------------- Main Loop -----------------------
 
-while True:
-    print_mainMenu()
-    option = ''
-    try:
-        option = int(input('Enter your choice: '))
-    except:
-        os.system('cls||clear')
-        print('Wrong input. Please enter a number ...')
-    # Check what choice was entered and act accordingly
-    if option == 1:
-        hostname = input("Enter the Domain Name: ")
-        file_path = os.path.join(path, hostname + '.csv')
-        file = hostname + '.csv'
-        if not os.path.isfile(file_path):
-            createFile(hostname)
+def main(flag):
+    while (flag):
+        print_mainMenu()
+        option = ''
+        try:
+            option = int(input('Enter your choice: '))
+        except:
+            os.system('cls||clear')
+            print('Wrong input. Please enter a number ...')
+        # Check what choice was entered and act accordingly
+        if option == 1:
+            hostname = input("Enter the Domain Name: ")
+            file_path = os.path.join(path, hostname + '.csv')
+            file = hostname + '.csv'
+            if not os.path.isfile(file_path):
+                createFile(hostname)
 
-        os.system('cls||clear')
+            os.system('cls||clear')
 
-        if hostname not in nameservers_history:
-            nameservers_history[hostname] = [[]]
-            option_hostname(hostname)
+            if hostname not in nameservers_history:
+                nameservers_history[hostname] = [[]]
+                option_hostname(hostname)
+            else:
+                option_hostname(hostname)
+
+        elif option == 2:
+            os.system('cls||clear')
+            print_FileStatMenu()
+
+        elif option == 3:
+            os.system('cls||clear')
+            print('Thanks for using APP !!')
+            flag=0
         else:
-            option_hostname(hostname)
+            os.system('cls||clear')
+            print('Invalid option. Please enter a number between 1 and 2...')
 
-    elif option == 2:
-        os.system('cls||clear')
-        print_FileStatMenu()
 
-    elif option == 3:
-        os.system('cls||clear')
-        print('Thanks for using APP !!')
-        exit()
-    else:
-        os.system('cls||clear')
-        print('Invalid option. Please enter a number between 1 and 2...')
 
 
 
