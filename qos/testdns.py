@@ -9,8 +9,8 @@ import pandas as pd
 
 # Guardar histórico de pesquisas para depois aproveitarmos estatísticas
 nameservers_history = {}
-
 path = "stat_files"
+main_directoy = os.getcwd()
 
 mainMenu_options = {
     1: 'Choose HostName to test',
@@ -27,6 +27,8 @@ query_options = {
     6: 'Type CNAME (Domain Name Alias)',
     7: 'Exit to Main Menu'
 }
+
+
 
 # -------------------- File treatment -----------------------
 
@@ -208,7 +210,7 @@ def print_FileStatMenu():
         if option == index+1:
             os.system('cls||clear')
             # TENHO DE ALTERAR ISTO PARA VIR
-            os.chdir("C:\\Users\\USER\\Desktop\\Mestrado\\2SEM\PERFIL_EI\\QoSI\\TP2")
+            os.chdir(main_directoy)
             print('Going to Main Menu')
             break
 
@@ -252,11 +254,14 @@ def getAqueryStatsAll(files):
     fig = plt.figure(figsize=(10, 5))
 
     # creating the bar plot
-    plt.bar(type_q, values, color='maroon',
+    bars = plt.bar(type_q, values, color='maroon',
             width=0.4)
 
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x(), yval + .05, yval)
     plt.xlabel("Name Domains")
-    plt.ylabel("Time(ms)")
+    plt.ylabel("Tempo Medido(ms)")
     plt.title("Tempo de resposta média a para cada domínio requisitado")
     plt.show()
 
@@ -320,7 +325,7 @@ def showQueryBarPlot(filename,fileDF,query):
 
     median_date = {}
     for d in different_dates:
-        median_date[d] = different_dates[d][1] / different_dates[d][0]
+        median_date[d] = round((different_dates[d][1] / different_dates[d][0]),2)
 
 
 
@@ -328,19 +333,27 @@ def showQueryBarPlot(filename,fileDF,query):
     values = list(median_date.values())
 
     # Figure Size
-    fig = plt.figure(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+
 
     # creating the bar plot
-    plt.bar(type_q, values, color='blue',
+    bars = plt.bar(type_q, values, color='blue',
             width=0.4)
+
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x(), yval + .05, yval)
+
     plt.title('Valores de tempo medido para ' + filename + ' em query ' + query)
-    plt.ylabel('Data de Medição')
-    plt.xlabel('Tempo medido')
+    plt.xlabel('Data de Medição')
+    plt.ylabel('Tempo medido(ms)')
+
+
     plt.show()
 
 
-
-
+# ----------------------- Main Loop -----------------------
 
 while True:
     print_mainMenu()
